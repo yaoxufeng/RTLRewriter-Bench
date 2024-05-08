@@ -1,0 +1,51 @@
+Now you are expert in Verilog. Your objective is to optimize the Verilog code to achieve better synthesis results. Please return the optimized code based on the given Original Code.
+
+Original Code:
+```verilog
+module example(
+    input [7:0] input_a,    // 8-bit input operand A
+    input [7:0] input_b,    // 8-bit input operand B
+    input [3:0] opcode,     // Operation code
+    output reg [7:0] result,  // Result of the ALU operation
+    output zero_flag        // Flag indicating result is zero
+);
+
+// Define opcode constants for clarity
+localparam ADD  = 3'b000;
+localparam SUB  = 3'b001;
+localparam AND  = 3'b010;
+localparam OR   = 3'b011;
+localparam XOR  = 3'b100;
+localparam NOT  = 3'b101;
+localparam BCD_CORRECTION = 3'b110;
+
+always @(*) begin
+    case (opcode)
+        ADD:  // Perform addition without sharing any subexpression
+            result = input_a + input_b;
+        SUB:  // Perform subtraction
+            result = input_a - input_b;
+        AND:  // Perform bitwise AND
+            result = input_a & input_b;
+        OR:   // Perform bitwise OR
+            result = input_a | input_b;
+        XOR:  // Perform bitwise XOR
+            result = input_a ^ input_b;
+        NOT:  // Perform bitwise NOT only on input A
+            result = ~input_a;
+        BCD_CORRECTION:  // BCD addition correction, computed each time from scratch
+            begin
+                result = input_a + input_b;  // Adding both inputs
+                // Applying BCD correction if the sum is greater than 9
+                if (result > 9)
+                    result = result + 6;
+            end
+        default: result = 8'b0;  // Default result is zero
+    endcase
+end
+
+// Set the zero flag if the result is zero
+assign zero_flag = (result == 0);
+
+endmodule
+```

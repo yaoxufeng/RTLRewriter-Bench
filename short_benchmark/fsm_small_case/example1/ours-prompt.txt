@@ -1,0 +1,54 @@
+module example_optimized(
+    input wire clk,
+    input wire reset,
+    input wire [1:0] input_signal, // 2-bit input for four possible inputs (0-3)
+    output reg output_signal
+);
+
+    // Define state codes with potential reductions
+    parameter S0 = 2'b00,
+              S1 = 2'b01,
+              S2 = 2'b10;  // Merged state S2 represents S2, S4 due to similar output behavior
+
+    // State register
+    reg [1:0] current_state, next_state;
+
+    // Output logic based on the current state
+    always @(current_state) begin
+        // Output signal logic simplified based on merged states
+        output_signal = (current_state == S0 || current_state == S2) ? 1 : 0;
+    end
+
+    // Sequential logic for state transitions
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            current_state <= S0; // Reset to state S0
+        end else begin
+            current_state <= next_state;
+        end
+    end
+
+    // Combinational logic for next state
+    always @(*) begin
+        // Default to staying in the same state
+        next_state = current_state;
+
+        // Determine the next state based on the current state and input
+        case (current_state)
+            S0: case (input_signal)
+                2'b00: next_state = S0;
+                2'b01: next_state = S1;
+                2'b10, 2'b11: next_state = S2;  // Merged transitions for inputs leading to S2 and S4
+            endcase
+            S1: case (input_signal)
+                2'b00, 2'b01, 2'b11: next_state = S0;  // Merged transitions based on the similarity in reset to S0
+                2'b10: next_state = S1;  // Stays in S1
+            endcase
+            S2: case (input_signal)
+                2'b00, 2'b01: next_state = S0;  // Simplified transitions
+                2'b10: next_state = S1;
+                2'b11: next_state = S2;
+            endcase
+        endcase
+    end
+endmodule

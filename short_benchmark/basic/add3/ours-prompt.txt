@@ -1,0 +1,256 @@
+Now you are an experienced and skilled Verilog engineer. Your objective is to optimize the given Verilog Code to obtain better synthesis results including area, performance while Ensuring the optimized version retains FUNCTIONAL EQUIVALENCE. 
+
+Here's an optimization example.
+
+</EXAMPLE 1>
+
+Original Code:
+```verilog
+module example(
+    input wire clk,
+    input wire reset,
+    input wire [1:0] input_signal, // 2-bit input to represent four possible inputs (0-3)
+    output reg output_signal
+);
+
+    // Define state codes
+    parameter S0 = 3'b000,
+              S1 = 3'b001,
+              S2 = 3'b010,
+              S3 = 3'b011,
+              S4 = 3'b100,
+              S5 = 3'b101;
+
+    // State register
+    reg [2:0] current_state, next_state;
+
+    // Output logic based on the current state
+    always @(current_state) begin
+        // By default, set output to 0
+        output_signal = 0;
+
+        // Update the output signal based on the current state
+        case (current_state)
+            S0: output_signal = 1;
+            S2: output_signal = 1;
+            S4: output_signal = 1;
+            default: output_signal = 0;
+        endcase
+    end
+
+    // Sequential logic for state transitions
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            current_state <= S0; // Reset to state S0
+        end else begin
+            current_state <= next_state;
+        end
+    end
+
+    // Combinational logic for next state
+    always @(*) begin
+        // Default to staying in the same state
+        next_state = current_state;
+
+        // Determine the next state based on the current state and input
+        case (current_state)
+            S0: case (input_signal)
+                2'b00: next_state = S0;
+                2'b01: next_state = S1;
+                2'b10: next_state = S2;
+                2'b11: next_state = S3;
+            endcase
+            S1: case (input_signal)
+                2'b00: next_state = S0;
+                2'b01: next_state = S3;
+                2'b11: next_state = S5;
+                // No case for 2'b10 as it leads to S1 itself
+            endcase
+            S2: case (input_signal)
+                2'b00: next_state = S1;
+                2'b01: next_state = S3;
+                2'b10: next_state = S2;
+                2'b11: next_state = S4;
+            endcase
+            S3: case (input_signal)
+                2'b00: next_state = S1;
+                2'b01: next_state = S0;
+                2'b10: next_state = S4;
+                2'b11: next_state = S5;
+            endcase
+            S4: case (input_signal)
+                2'b00: next_state = S0;
+                2'b01: next_state = S1;
+                2'b10: next_state = S2;
+                2'b11: next_state = S5;
+            endcase
+            S5: case (input_signal)
+                2'b00: next_state = S1;
+                2'b01: next_state = S4;
+                2'b10: next_state = S0;
+                // No case for 2'b11 as it leads to S5 itself
+            endcase
+        endcase
+    end
+endmodule
+```
+
+Optimized Version:
+```verilog
+module fsm (
+    input wire clk,
+    input wire reset,
+    input wire [1:0] input_signal,  // 2-bit input for 4 different inputs (0-3)
+    output reg output_signal
+);
+
+    // Define state codes
+    parameter S0 = 2'b00,
+              S1 = 2'b01,
+              S2 = 2'b10,
+              S3 = 2'b11;
+
+    // Define states as a reg type for sequential logic
+    reg [1:0] current_state, next_state;
+
+    // Sequential logic for state transitions
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            current_state <= S0;  // Start at S0 on reset
+        end else begin
+            current_state <= next_state;
+        end
+    end
+
+    // Combinational logic for next state and output signal
+    always @(*) begin
+        // Defaults for next state and output
+        next_state = current_state;
+        output_signal = 1'b0;
+
+        case (current_state)
+            S0: begin
+                case (input_signal)
+                    2'b00: begin next_state = S0; output_signal = 1'b1; end
+                    2'b01: begin next_state = S1; output_signal = 1'b1; end
+                    2'b10: begin next_state = S2; output_signal = 1'b1; end
+                    2'b11: begin next_state = S3; output_signal = 1'b1; end
+                endcase
+            end
+            S1: begin
+                case (input_signal)
+                    2'b00: next_state = S0;
+                    // For input 2'b01 and 2'b11, next_state remains S3, as shown in the table.
+                    2'b01: next_state = S3;
+                    2'b10: next_state = S1;
+                    2'b11: next_state = S3;
+                endcase
+            end
+            S2: begin
+                case (input_signal)
+                    2'b00: begin next_state = S1; output_signal = 1'b1; end
+                    2'b01: begin next_state = S3; output_signal = 1'b1; end
+                    2'b10: begin next_state = S2; output_signal = 1'b1; end
+                    2'b11: begin next_state = S0; output_signal = 1'b1; end
+                endcase
+            end
+            S3: begin
+                case (input_signal)
+                    2'b00: next_state = S1;
+                    2'b01: next_state = S0;
+                    2'b10: next_state = S0;
+                    2'b11: next_state = S3;
+                endcase
+            end
+            default: begin
+                next_state = S0;
+                output_signal = 1'b0;
+            end
+        endcase
+    end
+
+endmodule
+```
+
+# Guidelines:
+- PAY ATTENTION to sub-expression elimnations.
+- Make SURE complete to every step PERFECTLY without ANY Mistakes.
+- Make a deeper understanding of how each state interacts and transitions based on the input and the impact on the output.
+- Carefully check input and output state, ENSURE the optimized version retains FUNCTIONAL EQUIVALENCE with the original while being OPTIMIZED for synthesis.
+- You can draw insiprations from provided examples, utilizing its optimization patterns rather than following its code style.
+- Make SURE your optimized version is clear and understandable.
+
+Take a Deep Breath and Carefully Follow the Guides I gave you. I will tip you $2000 if you OPTIMIZE the Code Perfectly.
+
+## INSTANCE1
+
+Original Code:
+
+```verilog
+module example (
+    input wire clk,
+    input wire reset,
+    input wire x,
+    output reg output_signal
+);
+
+    // State encoding
+    localparam S0 = 3'b000,
+               S1 = 3'b001,
+               S2 = 3'b010,
+               S3 = 3'b011,
+               S4 = 3'b100,
+               S5 = 3'b101,
+               S6 = 3'b110;
+
+    reg [2:0] next_state;
+    reg [2:0] state;  // 3-bit state representation for S0 to S6
+
+    // Sequential logic for state transitions
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            state <= S0;  // Reset to state S0
+        end else begin
+            state <= next_state;
+        end
+    end
+
+    // Combinational logic for next state and output
+    always @(*) begin
+        case (state)
+            S0: begin
+                next_state = x ? S2 : S1;
+                output_signal = 1'b1;
+            end
+            S1: begin
+                next_state = x ? S5 : S3;
+                output_signal = 1'b1;
+            end
+            S2: begin
+                next_state = x ? S4 : S5;
+                output_signal = 1'b0;
+            end
+            S3: begin
+                next_state = x ? S6 : S1;
+                output_signal = 1'b1;
+            end
+            S4: begin
+                next_state = x ? S2 : S5;
+                output_signal = 1'b0;
+            end
+            S5: begin
+                next_state = x ? S3 : S4;
+                output_signal = 1'b0;
+            end
+            S6: begin
+                next_state = x ? S6 : S5;
+                output_signal = 1'b0;
+            end
+            default: begin
+                next_state = S0;  // Default to state S0 if an undefined state is encountered
+                output_signal = 1'b0;
+            end
+        endcase
+    end
+endmodule
+```

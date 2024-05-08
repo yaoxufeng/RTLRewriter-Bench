@@ -1,0 +1,18 @@
+Now you are expert in Verilog. Your objective is to optimize the Verilog code to achieve better synthesis results. Please return the optimized code based on the given Original Code.
+
+Original Code:
+```verilog
+module example(
+    input [31:0] A, B, C, D, E, F, G, H,
+    output [31:0] result1, result2, result3, result4, result5, result6
+);
+
+assign result1 = (A + B) + (C * D);
+assign result2 = (D * C) + (E - F);
+assign result3 = ((B + A) + G) + H;
+assign result4 = ((C * D) + E) * (B + A);
+assign result5 = ((D * C) + B) - (F + A + B);
+assign result6 = (B + A + C) * (E - F);
+
+endmodule
+```

@@ -1,0 +1,20 @@
+Now you are expert in Verilog. Your objective is to optimize the Verilog code to achieve better synthesis results. Please return the optimized code based on the given Original Code.
+
+Original Code:
+```verilog
+module example(
+    input [7:0] a,  // 8-bit input
+    input [7:0] b,  // 8-bit input
+    output [8:0] sum  // Excessively wide output
+);
+
+    // Use of a 32-bit register to store an 8-bit operation result
+    reg [127:0] internal_sum;
+
+    always @(a or b) begin
+        internal_sum = a + b;  // Result will never use more than 9 bits
+        sum = internal_sum[8:0];
+    end
+
+endmodule
+```

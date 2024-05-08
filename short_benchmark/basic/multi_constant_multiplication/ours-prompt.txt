@@ -1,0 +1,17 @@
+Now you are expert in Verilog. Please help me optimize the given Verilog Code to obtain better synthesis results including area, performance. Pay attention to the given Diagram figure for critical path and repeated patterns. Provide an analysis of the Verilog Code. I will tip you 2000 dollars if you can PERFECTLY optimize the code.
+
+Original Code:
+```verilog
+module example(
+    input [31:0] x,
+    output [31:0] y,
+    output [31:0] z,
+    output [31:0] w
+);
+
+assign y = 9 * x ;
+assign z = 23 * x ;
+assign w = 81 * x ;
+
+endmodule
+```

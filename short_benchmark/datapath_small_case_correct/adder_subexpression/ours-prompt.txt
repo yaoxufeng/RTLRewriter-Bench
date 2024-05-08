@@ -1,0 +1,140 @@
+Now you are an experienced and skilled Verilog engineer. Your objective is to optimize the given Verilog Code to obtain better synthesis results including area, performance.
+
+Here's an optimization example.
+
+</EXAMPLE 1>
+
+Original Code:
+```verilog
+module example(
+    input [7:0] input_a,    // 8-bit input operand A
+    input [7:0] input_b,    // 8-bit input operand B
+    input [3:0] opcode,     // Operation code
+    output reg [7:0] result,  // Result of the ALU operation
+    output zero_flag        // Flag indicating result is zero
+);
+
+// Define opcode constants for clarity
+localparam ADD  = 3'b000;
+localparam SUB  = 3'b001;
+localparam AND  = 3'b010;
+localparam OR   = 3'b011;
+localparam XOR  = 3'b100;
+localparam NOT  = 3'b101;
+localparam BCD_CORRECTION = 3'b110;
+
+always @(*) begin
+    case (opcode)
+        ADD:  // Perform addition without sharing any subexpression
+            result = input_a + input_b;
+        SUB:  // Perform subtraction
+            result = input_a - input_b;
+        AND:  // Perform bitwise AND
+            result = input_a & input_b;
+        OR:   // Perform bitwise OR
+            result = input_a | input_b;
+        XOR:  // Perform bitwise XOR
+            result = input_a ^ input_b;
+        NOT:  // Perform bitwise NOT only on input A
+            result = ~input_a;
+        BCD_CORRECTION:  // BCD addition correction, computed each time from scratch
+            begin
+                result = input_a + input_b;  // Adding both inputs
+                // Applying BCD correction if the sum is greater than 9
+                if (result > 9)
+                    result = result + 6;
+            end
+        default: result = 8'b0;  // Default result is zero
+    endcase
+end
+
+// Set the zero flag if the result is zero
+assign zero_flag = (result == 0);
+
+endmodule
+```
+
+Optimized Version:
+```verilog
+module example(
+    input [7:0] input_a,   // 8-bit input operand A
+    input [7:0] input_b,   // 8-bit input operand B
+    input [3:0] opcode,    // Operation code
+    output reg [7:0] result,  // 8-bit result
+    output zero_flag       // Zero flag
+);
+
+// Intermediate shared expressions
+wire [7:0] sum, subtract, and_res, or_res, xor_res;
+wire carry_out;
+
+// Shared addition and subtraction computation
+assign {carry_out, sum} = input_a + input_b;  // Addition with carry
+assign subtract = input_a - input_b;          // Subtraction
+
+// Shared bitwise operations
+assign and_res = input_a & input_b;           // Bitwise AND
+assign or_res = input_a | input_b;            // Bitwise OR
+assign xor_res = input_a ^ input_b;           // Bitwise XOR
+
+// ALU operation execution based on opcode
+always @(*) begin
+    case (opcode)
+        4'b0000: result = sum;                // Addition
+        4'b0001: result = subtract;           // Subtraction
+        4'b0010: result = and_res;            // AND
+        4'b0011: result = or_res;             // OR
+        4'b0100: result = xor_res;            // XOR
+        4'b0101: result = ~input_a;           // NOT A
+        4'b0110: result = (sum < 10) ? sum : (sum + 6); // BCD Addition Correction
+        default: result = 8'b0;
+    endcase
+end
+
+// Zero flag output
+assign zero_flag = (result == 0);
+
+endmodule
+```
+
+# Guidelines:
+- Make SURE complete to every step PERFECTLY without ANY Mistakes.
+- Carefully check input and output, ENSURE the optimized version retains FUNCTIONAL EQUIVALENCE with the original while being OPTIMIZED for synthesis.
+- End with <```verilog>Solution<```> Format
+- You can draw insiprations from provided examples, utilizing its optimization patterns rather than following its code style.
+
+Take a Deep Breath and Carefully Follow the Examples and Guides I gave you. I will tip you $2000 if you OPTIMIZE the Code Perfectly.
+
+## INSTANCE1
+
+Original Code:
+
+```verilog
+module example(
+    input [7:0] a,
+    input [7:0] b,
+    input [7:0] c,
+    input [7:0] d,
+    output [9:0] sum  // Output to accommodate possible overflow
+);
+
+    // Direct addition without intermediate sharing
+    wire [8:0] sum_ab;    // Sum of a and b
+    wire [9:0] sum_abc;   // Sum of a+b and c
+    wire [10:0] sum_abcd;  // Final sum of a+b+c+d
+
+    // Calculate sum of a and b
+    assign sum_ab = a + b;
+
+    // Calculate sum of a+b and c
+    assign sum_abc = sum_ab + c;
+
+    // Calculate final sum of a+b+c and d
+    assign sum_abcd = sum_abc + d;
+
+    // Output the final sum
+    assign sum = sum_abcd;
+
+endmodule
+
+```
