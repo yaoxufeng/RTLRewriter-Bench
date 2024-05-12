@@ -1,26 +1,34 @@
 // vending-machine
 module vending_machine(
-    input wire clk,
-    input wire reset,
-    input wire condition,
-    input wire sel,
-    input wire [63:0] discountA,
-    input wire [63:0] discountB,
-    input wire [63:0] discountC,
-    input wire [63:0] discountD,
-    output reg output_signal,
-    output reg [63:0] total_discount
-);
-
+                      clk,
+                      reset,
+                      condition,
+                      sel,
+                      discountA,
+                      discountB,
+                      discountC,
+                      discountD,
+                      total_discount,
+                      sell_signal
+                      );
     // State encoding
-    localparam S0 = 4'b0000,
+    localparam  S0 = 4'b0000,
                S1 = 4'b0001,
                S2 = 4'b0010,
-               S5 = 4'b0101;
+               S5 = 4'b0011;
+
+    parameter DATA_WIDTH = 64;
+    parameter K = 16;
+
+    input wire clk, reset, condition, sel;
+    input wire [K*DATA_WIDTH-1:0] discountA, discountB, discountC, discountD;
+
+    output reg sell_signal;
+    output reg [K*DATA_WIDTH-1:0] total_discount;
 
     reg [3:0] next_state;
     reg [3:0] state;  // 3-bit state representation for S0 to S6
-    reg [63:0] discount1, discount2;
+    reg [K*DATA_WIDTH-1:0] discount1, discount2;
 
     // Sequential logic for state transitions
     always @(posedge clk or posedge reset) begin
@@ -31,10 +39,8 @@ module vending_machine(
         end
     end
 
-    // Combinatorial logic for next state and output
-    always @(*) begin
-    	// selective sum issue
-    	if (sel) begin
+   always @(*) begin
+        if (sel) begin
             discount1 = discountA;
             discount2 = discountB;
         end else begin
@@ -42,27 +48,35 @@ module vending_machine(
             discount2 = discountD;
         end
         total_discount = discount1 + discount2;
+    end
 
+    // Combinatorial logic for next state and output
+    always @(*) begin
         case (state)
             S0: begin
                 next_state = condition ? S2 : S1;
-                output_signal = 1'b1;
+                sell_signal = 1'b1;
+                //total_discount = discountA + discountB;
             end
             S1: begin
                 next_state = condition ? S5 : S0;
-                output_signal = 1'b1;
+                sell_signal = 1'b1;
+                //total_discount = discountA + discountB;
             end
             S2: begin
                 next_state = condition ? S2 : S5;
-                output_signal = 1'b0;
+                sell_signal = 1'b0;
+                //total_discount = discountC + discountD;
             end
             S5: begin
                 next_state = condition ? S0 : S2;
-                output_signal = 1'b0;
+                sell_signal = 1'b0;
+                //total_discount = discountC + discountD;
             end
             default: begin
                 next_state = S0;  // Default to state S0 if an undefined state is encountered
-                output_signal = 1'b0;
+                sell_signal = 1'b0;
+                //total_discount = discountC + discountD;
             end
         endcase
     end

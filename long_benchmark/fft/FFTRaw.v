@@ -1,4 +1,5 @@
 `timescale 1 ns / 100 ps
+
 module filtered_power_fft8_raw (
     input                    clk,
     input                    rstn,
@@ -146,13 +147,13 @@ module filtered_power_fft8_raw (
     assign     y7_real = xm_real[3][7] ;
     assign     y7_imag = xm_imag[3][7] ;
 
-    always @(*) begin
+    //always @(*) begin
         if (sel) begin
-            power = y0_real * y0_real + y0_imag * y0_imag + y1_real * y1_real + y1_imag * y1_imag + y2_real* y2_real + y2_imag * y2_imag +y3_real * y3_real + y3_imag * y3_imag;
+            assign power = y0_real * y0_real + y0_imag * y0_imag + y1_real * y1_real + y1_imag * y1_imag + y2_real* y2_real + y2_imag * y2_imag +y3_real * y3_real + y3_imag * y3_imag;
         end else begin
-            power = y4_real * y4_real + y4_imag * y4_imag + y5_real * y5_real + y5_imag * y5_imag + y6_real* y6_real + y6_imag * y6_imag +y7_real * y7_real + y7_imag * y7_imag;
+            assign power = y4_real * y4_real + y4_imag * y4_imag + y5_real * y5_real + y5_imag * y5_imag + y6_real* y6_real + y6_imag * y6_imag +y7_real * y7_real + y7_imag * y7_imag;
         end
-    end
+    //end
 endmodule
 
 

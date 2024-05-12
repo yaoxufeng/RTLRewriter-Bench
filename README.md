@@ -81,6 +81,7 @@ Optimized Verilog code here
 - Optimization Algorithm here
 
 # Guidelines:
+- Provide an in-depth analysis of given Verilog Code INSTANCE.
 - Make SURE complete to every step PERFECTLY without ANY Mistakes.
 - Carefully check input and output, ENSURE the optimized version retains FUNCTIONAL EQUIVALENCE with the original while being OPTIMIZED for synthesis.
 - End with ```verilog Your Verilog code here``` Format.
