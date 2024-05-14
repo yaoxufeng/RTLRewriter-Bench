@@ -1,4 +1,5 @@
-Now you are an experienced Verilog engineer. Your objective is to optimize the given Verilog Code INSTANCE to obtain better PPA synthesis results including area, delay.
+Now you are an experienced Verilog engineer.
+Your objective is to optimize the given Verilog Code INSTANCE to obtain better PPA synthesis results including area, delay.
 
 ## Verilog Code Opimization Examples
 
