@@ -30,7 +30,7 @@ always @(posedge clk) begin
             forces_stage2[i] <= 0;
             forces_stage3[i] <= 0;
         end
-    }
+    end
     else if (start) begin
         // Placeholder for Molecular Dynamics computation
         // Adding redundant data transfer between stages with individual element copying
@@ -39,7 +39,7 @@ always @(posedge clk) begin
             positions_stage3[i] <= positions_stage2[i];  // Further redundancy in data staging
             forces_stage2[i] <= forces[i];  // Redundant staging of force data
             forces_stage3[i] <= forces_stage2[i];  // Further redundancy in force data staging
-        }
+        end
         // Introducing redundant computations
         for (i = 0; i < blockSide*blockSide*blockSide*densityFactor; i = i + 1) begin
             forces_stage3[i] <= forces_stage3[i] + 0;  // Redundant operation that does not change the value
